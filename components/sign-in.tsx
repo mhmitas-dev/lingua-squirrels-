@@ -1,64 +1,63 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Button } from './ui/button'
-import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
-import { User } from '@supabase/supabase-js'
+import { Button } from "./ui/button";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { User } from "@supabase/supabase-js";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut } from 'lucide-react'
+} from "@/components/ui/dropdown-menu";
+import { LogOut } from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider"; // Import the hook
 
-const SignInButton = ({ user }: { user: User | null }) => {
-    const supabase = getSupabaseBrowserClient()
-    const [currentUser, setCurrentUser] = useState<User | null>(user);
+const SignInButton = () => {
+    // 1. Consume the global state instead of creating local state
+    const { user, isLoading } = useAuth();
+    const supabase = getSupabaseBrowserClient();
 
     const handleGoogleSignIn = async () => {
         await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-                redirectTo: 'https://linguasquirrels.vercel.app/',
+                // 2. Fix: Use window.location.origin to support localhost AND production automatically
+                redirectTo: `${window.location.origin}/`,
             },
-        })
-    }
+        });
+    };
 
-    async function handleSignOut() {
+    const handleSignOut = async () => {
         await supabase.auth.signOut();
-        setCurrentUser(null);
-    }
+        // No need to manually set state null; the AuthProvider listener handles it!
+    };
 
-    useEffect(() => {
-        const { data: listener } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
-                setCurrentUser(session?.user ?? null);
-            }
-        );
-
-        return () => {
-            listener?.subscription.unsubscribe();
-        };
-    }, [supabase])
+    // Optional: Render a loading skeleton or nothing while checking session
+    if (isLoading) return null;
 
     return (
         <div>
-            {currentUser ? (
-                <ProfileMenu user={currentUser} handleSignOut={handleSignOut} />
-            ) :
+            {user ? (
+                <ProfileMenu user={user} handleSignOut={handleSignOut} />
+            ) : (
                 <Button onClick={handleGoogleSignIn}>Sign In</Button>
-            }
+            )}
         </div>
-    )
-}
+    );
+};
 
 export default SignInButton;
 
-
-function ProfileMenu({ user, handleSignOut }: { user: User; handleSignOut: () => Promise<void> }) {
-    const formatter = new Intl.DateTimeFormat('en-US', {
+// ProfileMenu remains largely the same, just receiving the user object
+function ProfileMenu({
+    user,
+    handleSignOut,
+}: {
+    user: User;
+    handleSignOut: () => Promise<void>;
+}) {
+    const formatter = new Intl.DateTimeFormat("en-US", {
         dateStyle: "short",
         timeStyle: "short",
     });
@@ -66,36 +65,53 @@ function ProfileMenu({ user, handleSignOut }: { user: User; handleSignOut: () =>
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="secondary" className='flex items-center gap-3 rounded-full cursor-pointer pl-0 border-2'>
-                    <div className='size-9 rounded-full overflow-hidden'>
-                        <img className='' src={user.user_metadata?.avatar_url || ""} alt="Avatar" />
+                <Button
+                    variant="secondary"
+                    className="flex items-center gap-3 rounded-full cursor-pointer pl-0 border-2"
+                >
+                    <div className="size-9 rounded-full overflow-hidden">
+                        <img
+                            className=""
+                            src={user.user_metadata?.avatar_url || ""}
+                            alt="Avatar"
+                        />
                     </div>
-                    <div className=''>
+                    <div className="">
                         <p>{user.user_metadata?.full_name}</p>
                     </div>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-                {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
                 <div>
-                    <div className='size-24 my-4 mb-2 rounded-full overflow-hidden mx-auto'>
-                        <img className='' src={user.user_metadata?.avatar_url || ""} alt="Avatar" />
+                    <div className="size-24 my-4 mb-2 rounded-full overflow-hidden mx-auto">
+                        <img
+                            className=""
+                            src={user.user_metadata?.avatar_url || ""}
+                            alt="Avatar"
+                        />
                     </div>
-                    <div className='p-2 text-muted-foreground text-xs'>
+                    <div className="p-2 text-muted-foreground text-xs">
                         <p>Name: {user.user_metadata?.full_name}</p>
                         <p>Email: {user.email}</p>
-                        <p>Created At: {formatter.format(new Date(user.created_at))}</p>
+                        {user.created_at && (
+                            <p>
+                                Created At: {formatter.format(new Date(user.created_at))}
+                            </p>
+                        )}
                     </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Delete Account</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className='flex justify-between'>
+                <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="flex justify-between"
+                >
                     <span>Log out</span>
-                    <LogOut />
+                    <LogOut className="w-4 h-4" />
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-    )
+    );
 }

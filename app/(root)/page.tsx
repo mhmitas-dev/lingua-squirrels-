@@ -1,24 +1,28 @@
-import WelcomeHero from "@/components/home/WelcomeHero";
-import { createSupabaseServerClient } from "@/lib/supabase/server-client";
+"use client";
 
-export default async function Home() {
-  const supabase = await createSupabaseServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  console.log({ user })
+import Options from "@/components/home/Options";
+import Rooms from "@/components/home/Rooms";
+import WelcomeHero from "@/components/home/WelcomeHero";
+import { useAuth } from "@/components/providers/AuthProvider";
+
+export default function Home() {
+  const { user, isLoading } = useAuth();
 
   return (
-    <main className="min-h-[clac(100vh-64px)] w-full flex flex-col bg-background overflow-hidden">
-      {/* Hero */}
-      <WelcomeHero />
-
-      {/* Bottom Banner */}
-      {/* <div className="fixed bottom-0 w-full text-center py-2 text-sm font-medium" style={{ backgroundColor: 'red', color: 'white' }}>
-        This app is under development — coming soon!
-      </div> */}
-
+    <main className="min-h-[clac(100vh-64px)] w-full flex flex-col bg-background relative">
+      {
+        isLoading ? (
+          <div className="text-xl text-center p-4"><span>Loading...</span></div>
+        ) :
+          user ? (
+            <div>
+              <Options />
+              <Rooms />
+            </div>
+          ) : (
+            <WelcomeHero />
+          )
+      }
     </main>
-
   );
 }

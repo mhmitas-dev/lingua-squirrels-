@@ -1,13 +1,9 @@
-import React from 'react'
-import SignInButton from '../sign-in'
-import { createSupabaseServerClient } from '@/lib/supabase/server-client';
+"use client";
+import { useAuth } from "@/components/providers/AuthProvider";
+import SignInButton from "../sign-in";
 
-const Navbar = async () => {
-
-    const supabase = await createSupabaseServerClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+const Navbar = () => {
+    const { isLoading } = useAuth(); // Instant access!
 
     return (
         <nav className="w-full border-b border-border bg-card/80 backdrop-blur z-10">
@@ -20,10 +16,16 @@ const Navbar = async () => {
                     </span>
                 </div>
 
-                <SignInButton user={user} />
+                <div>
+                    {isLoading ? (
+                        <div>Loading...</div>
+                    ) :
+                        <SignInButton />
+                    }
+                </div>
             </div>
         </nav>
-    )
-}
+    );
+};
 
-export default Navbar
+export default Navbar;
