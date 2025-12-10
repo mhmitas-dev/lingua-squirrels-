@@ -6,25 +6,28 @@ import React from "react";
 const Layout = async ({ children }: { children: React.ReactNode }) => {
     const supabase = await createSupabaseServerClient();
 
-    // 1. Security Check: Use getUser() to verify the token with Supabase server
-    // This ensures the user hasn't been banned or deleted since the cookie was set.
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-    // console.log("See the DB user:", user)
+    // Secure: verify cookie → fetch user from server
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    // 2. Hydration: Only if the user is verified, get the session tokens
-    // We pass this to the client so it knows the user is logged in immediately.
-    let session = null;
-    if (user) {
-        const { data } = await supabase.auth.getSession();
-        session = data.session;
+    if (userError) {
+        console.error("Supabase auth error:", userError.message);
     }
 
+    // If user exists, load session for hydration
+    let session = null;
+    if (user) {
+        const { data: { session: serverSession }, error: sessionError } =
+            await supabase.auth.getSession();
+
+        if (sessionError) {
+            console.error("Session load error:", sessionError.message);
+        }
+
+        session = serverSession ?? null;
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
-            {/* Pass the verified session to the provider */}
             <AuthProvider initialSession={session}>
                 <Navbar />
                 <main className="flex-1">{children}</main>

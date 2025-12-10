@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
@@ -20,37 +20,31 @@ export const useAuth = () => useContext(AuthContext);
 
 export default function AuthProvider({
     children,
-    initialSession, // <--- Key optimization: pass server session here
+    initialSession,
 }: {
     children: React.ReactNode;
     initialSession: Session | null;
 }) {
-    const supabase = getSupabaseBrowserClient();
+    // Ensures one stable instance across renders
+    const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+
     const [session, setSession] = useState<Session | null>(initialSession);
     const [user, setUser] = useState<User | null>(initialSession?.user ?? null);
     const [isLoading, setIsLoading] = useState(!initialSession);
 
     useEffect(() => {
-        // 1. Set up the Real-time Auth Listener
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((event, session) => {
-            // This handles sign-in, sign-out, and token refreshes automatically
-            console.log("Auth event:", event);
-            setSession(session);
-            setUser(session?.user ?? null);
-            setIsLoading(false);
-
-            if (event === 'SIGNED_OUT') {
-                // Optional: Clear any local caches or redirect
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+            (event, newSession) => {
+                console.log("Auth event:", event);
+                setSession(newSession);
+                setUser(newSession?.user ?? null);
+                setIsLoading(false);
             }
-        });
+        );
 
-        return () => {
-            subscription.unsubscribe();
-        };
+        return () => authListener.subscription.unsubscribe();
     }, [supabase]);
-    // console.log("session:", session)
+
     return (
         <AuthContext.Provider value={{ user, session, isLoading }}>
             {children}
