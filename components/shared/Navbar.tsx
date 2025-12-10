@@ -7,7 +7,7 @@ const Navbar = () => {
 
     return (
         <nav className="w-full border-b border-border bg-card/80 backdrop-blur z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div className="custom-container flex items-center justify-between">
 
                 <div className="flex items-center gap-3">
                     <img src="/images/logo-squirrel.png" alt="app-logo" className="h-9 w-9" />

@@ -17,7 +17,7 @@ const SignInButton = () => {
     // 1. Consume the global state instead of creating local state
     const { user, isLoading } = useAuth();
     const supabase = getSupabaseBrowserClient();
-
+    console.log("SignInButton user:", user)
     const handleGoogleSignIn = async () => {
         await supabase.auth.signInWithOAuth({
             provider: "google",

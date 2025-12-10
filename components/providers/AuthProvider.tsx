@@ -50,7 +50,7 @@ export default function AuthProvider({
             subscription.unsubscribe();
         };
     }, [supabase]);
-
+    // console.log("session:", session)
     return (
         <AuthContext.Provider value={{ user, session, isLoading }}>
             {children}
