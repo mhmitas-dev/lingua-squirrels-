@@ -1,4 +1,5 @@
 import AuthProvider from "@/components/providers/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import React from "react";
 
@@ -20,6 +21,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
             <AuthProvider initialSession={session}>
                 <main className="flex-1">{children}</main>
             </AuthProvider>
+            <Toaster />
         </div>
     );
 };

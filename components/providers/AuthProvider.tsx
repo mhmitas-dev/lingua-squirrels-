@@ -35,7 +35,7 @@ export default function AuthProvider({
     useEffect(() => {
         const { data: authListener } = supabase.auth.onAuthStateChange(
             (event, newSession) => {
-                console.log("Auth event:", event);
+                // console.log("Auth event:", event);
                 setSession(newSession);
                 setUser(newSession?.user ?? null);
                 setIsLoading(false);

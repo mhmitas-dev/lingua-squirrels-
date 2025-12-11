@@ -1,7 +1,5 @@
-import React from 'react'
 import { useAuth } from '../providers/AuthProvider';
-import { Button } from '../ui/button';
-import { Plus } from 'lucide-react';
+import { CreateGroupForm } from './create-group-form';
 
 const Options = () => {
     const { user } = useAuth();
@@ -9,10 +7,7 @@ const Options = () => {
     return (
         <section className='custom-container'>
             <div>
-                <Button>
-                    <Plus />
-                    <span>Create a new Group</span>
-                </Button>
+                <CreateGroupForm />
             </div>
         </section>
     )
