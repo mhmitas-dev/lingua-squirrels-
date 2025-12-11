@@ -9,20 +9,10 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     // Secure: verify cookie → fetch user from server
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (userError) {
-        console.error("Supabase auth error:", userError.message);
-    }
-
     // If user exists, load session for hydration
     let session = null;
     if (user) {
-        const { data: { session: serverSession }, error: sessionError } =
-            await supabase.auth.getSession();
-
-        if (sessionError) {
-            console.error("Session load error:", sessionError.message);
-        }
-
+        const { data: { session: serverSession }, error: sessionError } = await supabase.auth.getSession();
         session = serverSession ?? null;
     }
 
