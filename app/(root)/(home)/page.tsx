@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import Options from "@/components/home/Options";
 import Rooms from "@/components/home/Rooms";

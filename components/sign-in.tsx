@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider"; // Import the hook
+import Image from "next/image";
 
 const SignInButton = () => {
     // 1. Consume the global state instead of creating local state
@@ -31,6 +32,7 @@ const SignInButton = () => {
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         // No need to manually set state null; the AuthProvider listener handles it!
+        window.location.reload();
     };
 
     // Optional: Render a loading skeleton or nothing while checking session
@@ -70,10 +72,12 @@ function ProfileMenu({
                     className="flex items-center gap-3 rounded-full cursor-pointer pl-0 border-2"
                 >
                     <div className="size-9 rounded-full overflow-hidden">
-                        <img
+                        <Image
                             className=""
                             src={user.user_metadata?.avatar_url || ""}
                             alt="Avatar"
+                            width={36}
+                            height={36}
                         />
                     </div>
                     <div className="">
@@ -84,10 +88,12 @@ function ProfileMenu({
             <DropdownMenuContent className="w-56">
                 <div>
                     <div className="size-24 my-4 mb-2 rounded-full overflow-hidden mx-auto">
-                        <img
+                        <Image
                             className=""
                             src={user.user_metadata?.avatar_url || ""}
                             alt="Avatar"
+                            width={96}
+                            height={96}
                         />
                     </div>
                     <div className="p-2 text-muted-foreground text-xs">
